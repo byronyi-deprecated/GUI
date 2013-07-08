@@ -1,5 +1,8 @@
+#include <fstream>
+#include <string>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -46,6 +49,17 @@ bool MainWindow::loadFile(QString fileName)
         return false;
 
     ui->console->clear();
+
+    string inputFileName=fileName.toLocal8Bit().constData();
+    /*const char* chtempInput=inputFileName.c_str();
+    ifstream fin(chtempInput);*/
+    Load_TainVali_Matrix(inputFileName,matrix,classType,row,column,p0,p1);
+
+    /*int temp;
+    fin>>temp;
+    ui->console->append("temp");
+    fin.close();*/
+
 
     QTextStream in(&file);
     while (!in.atEnd()) {

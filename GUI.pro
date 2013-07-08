@@ -15,7 +15,9 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    loadmatrix.h \
+    qsort.h
 
 FORMS    += mainwindow.ui
 
