@@ -2,87 +2,89 @@
 #include <string>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "fileutils.h"
+
+#include <QDebug>
+
 using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+  QMainWindow(parent),
+  ui(new Ui::MainWindow),
+  currentMatrix(NULL)
 {
-    ui->setupUi(this);
-    ui->inputGroupBox->setDisabled(true);
-    ui->executeButton->setDisabled(true);
+  ui->setupUi(this);
+  ui->inputGroupBox->setDisabled(true);
+  ui->executeButton->setDisabled(true);
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+  delete ui;
 }
 
 void MainWindow::on_actionLoad_triggered()
 {
-    QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Load Training Set"),
-                                                          ".", tr("Training Set files (*.txt)"));
+  QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Load Training Set"),
+                                                        ".", tr("Training Set files (*.txt)"));
 
 
-    if(fileNames.empty())
+  if(fileNames.empty())
+    return;
+
+  ui->log->append("Loading files...\n");
+
+  for(QStringList::Iterator iter = fileNames.begin(); iter != fileNames.end(); ++iter)
+    if(!loadFile(*iter)) {
+        ui->log->append("Error in loading " + *iter + '\n');
         return;
+      }
 
-    ui->log->append("Loading files...\n");
+  ui->log->append("Initializing successfully\n");
 
-    for(QStringList::Iterator iter = fileNames.begin(); iter != fileNames.end(); ++iter)
-        if(!loadFile(*iter))
-        {
-            ui->log->append("Error in loading " + *iter + '\n');
-            return;
-        }
+  ui->inputGroupBox->setEnabled(true);
 
-    ui->log->append("Initializing successfully\n");
-
-    ui->inputGroupBox->setEnabled(true);
+  string firstLine = currentMatrix->outputFirstLine();
+  ui->console->append(QString(firstLine.c_str()));
 }
 
 bool MainWindow::loadFile(QString fileName)
 {
-    QFile file(fileName);
-
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        return false;
-
-    ui->console->clear();
-
-    string inputFileName=fileName.toLocal8Bit().constData();
-    /*const char* chtempInput=inputFileName.c_str();
-    ifstream fin(chtempInput);*/
-    Load_TainVali_Matrix(inputFileName,matrix,classType,row,column,p0,p1);
-
-    /*int temp;
-    fin>>temp;
-    ui->console->append("temp");
-    fin.close();*/
-
-
-    QTextStream in(&file);
-    while (!in.atEnd()) {
-        QString line = in.readLine();
-        ui->console->append(line);
+  map<QString, Matrix*>::iterator found = matrices.find(fileName);
+  if (found != matrices.end()) {
+      currentMatrix = found->second;
+      return true;
     }
 
-    return true;
+  ifstream ifs;
+  if (!openFile(ifs, fileName.toStdString()))
+    return false;
+
+  Matrix* new_matrix = new Matrix;
+
+  if (!(new_matrix->load(ifs, true))) {
+      delete new_matrix;
+      return false;
+    }
+
+  matrices[fileName] = new_matrix;
+  currentMatrix = new_matrix;
+  return true;
 }
 
 void MainWindow::on_executeButton_clicked()
 {
-    ui->console->append("=====");
-    ui->console->append(QString("The user has input: "));
-    ui->console->append(ui->input1LineEdit->text());
+  ui->console->append("=====");
+  ui->console->append(QString("The user has input: "));
+  ui->console->append(ui->input1LineEdit->text());
 }
 
 void MainWindow::on_input1LineEdit_textEdited(const QString &arg1)
 {
-    ui->executeButton->setDisabled(arg1.isEmpty());
+  ui->executeButton->setDisabled(arg1.isEmpty());
 }
 
 void MainWindow::on_actionAboutQt_triggered()
 {
-    qApp->aboutQt();
+  qApp->aboutQt();
 }

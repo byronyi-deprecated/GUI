@@ -13,11 +13,13 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    matrix.cpp \
+    fileutils.cpp
 
 HEADERS  += mainwindow.h \
-    loadmatrix.h \
-    qsort.h
+    matrix.h \
+    fileutils.h
 
 FORMS    += mainwindow.ui
 
