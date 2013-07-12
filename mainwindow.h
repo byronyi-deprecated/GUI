@@ -30,8 +30,6 @@ private slots:
 
     void on_executeButton_clicked();
 
-    void on_input1LineEdit_textEdited(const QString &arg1);
-
     void on_actionAboutQt_triggered();
 
 private:

@@ -79,11 +79,6 @@ void MainWindow::on_executeButton_clicked()
   ui->console->append(ui->input1LineEdit->text());
 }
 
-void MainWindow::on_input1LineEdit_textEdited(const QString &arg1)
-{
-  ui->executeButton->setDisabled(arg1.isEmpty());
-}
-
 void MainWindow::on_actionAboutQt_triggered()
 {
   qApp->aboutQt();
