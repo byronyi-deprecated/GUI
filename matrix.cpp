@@ -188,7 +188,7 @@ bool Matrix::getFirstLine(ifstream& ifs)
   return true;
 }
 
-string Matrix::outputFirstLine()
+string Matrix::outputClassType() const
 {
   stringstream ss;
 

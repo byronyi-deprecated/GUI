@@ -15,7 +15,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
   ui->setupUi(this);
   ui->inputGroupBox->setDisabled(true);
-  ui->executeButton->setDisabled(true);
 }
 
 MainWindow::~MainWindow()
@@ -44,8 +43,18 @@ void MainWindow::on_actionLoad_triggered()
 
   ui->inputGroupBox->setEnabled(true);
 
-  string firstLine = currentMatrix->outputFirstLine();
-  ui->console->append(QString(firstLine.c_str()));
+  QString col;
+  col.setNum(currentMatrix->col());
+  QString p0;
+  p0.setNum(currentMatrix->p0());
+  QString p1;
+  p1.setNum(currentMatrix->p1());
+
+  QString msg("The class Type of the training set consist ");
+  msg += col + " samples.\n" + "The fraction of 0 is ";
+  msg += p0 + "\n" + "The fraction of 1 is " + p1 + "\n";
+
+  ui->console->append(msg);
 }
 
 bool MainWindow::loadFile(QString fileName)
@@ -74,9 +83,6 @@ bool MainWindow::loadFile(QString fileName)
 
 void MainWindow::on_executeButton_clicked()
 {
-  ui->console->append("=====");
-  ui->console->append(QString("The user has input: "));
-  ui->console->append(ui->input1LineEdit->text());
 }
 
 void MainWindow::on_actionAboutQt_triggered()

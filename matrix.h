@@ -31,8 +31,12 @@ public:
   ~Matrix();
 
   bool load(ifstream& ifs, bool raw = true);
-  string outputFirstLine();
+  string outputClassType() const;
 
+  int col() const {return m_col;}
+  int row() const {return m_row;}
+  double p0() const {return m_p0;}
+  double p1() const {return m_p1;}
 private:
   bool generate01Matrix(ifstream& ifs);
   bool getMatrixInfo(ifstream& ifs);
