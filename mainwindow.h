@@ -32,6 +32,8 @@ private slots:
 
     void on_actionAboutQt_triggered();
 
+    void on_trialTimesSlider_valueChanged(int value);
+
 private:
     bool loadFile(QString);
     Ui::MainWindow *ui;

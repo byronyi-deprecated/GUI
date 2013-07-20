@@ -91,3 +91,10 @@ void MainWindow::on_actionAboutQt_triggered()
 {
   qApp->aboutQt();
 }
+
+void MainWindow::on_trialTimesSlider_valueChanged(int value)
+{
+  int round_off = value / 100000;
+  round_off *= 100000;
+  ui->trialTimesSlider->setValue(round_off);
+}
