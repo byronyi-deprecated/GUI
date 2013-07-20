@@ -5,10 +5,13 @@
 #include <vector>
 using namespace std;
 
+// Line: an assistant class for data pre-processing. Everything is
+//       calculted upon Line object construction. Typical usage is:
+//       call Line(data, col).cutoffValue() to get the cutoff value.
 class Line
 {
 public:
-  Line(double* line, int col);
+  Line(const vector<double>& line, int col);
   ~Line();
   double cutoffValue() const {return m_cutoff;}
 private:

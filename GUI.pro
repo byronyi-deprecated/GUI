@@ -25,3 +25,5 @@ FORMS    += mainwindow.ui
 
 RESOURCES += \
     spreadsheet.qrc
+
+OTHER_FILES +=

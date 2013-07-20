@@ -4,15 +4,15 @@
 #include <sstream>
 #include <iterator>
 
-Line::Line(double* line, int col)
+Line::Line(const vector<double>& line, int col)
   : m_line(NULL), m_col(col), m_cutoff(0.0),
     m_varianceFromBegin(NULL), m_varianceFromEnd(NULL)
 {
-  if (!line)
+  if (line.size() != static_cast<unsigned int>(col) )
     return;
 
   m_line = new double[m_col];
-  copy(line, line + col, m_line);
+  copy(line.begin(), line.end(), m_line);
 
   m_varianceFromBegin = new double[m_col];
   m_varianceFromEnd = new double[m_col];
@@ -28,9 +28,13 @@ Line::~Line()
   if (m_varianceFromEnd)
     delete [] m_varianceFromEnd;
 }
+//=======================================================================
+// generateCutoff: divide the (sorted) array into two parts by
+// calculating the cutoff value. See the loop below for details.
 
 void Line::generateCutoff()
 {
+  // sort m_line before we find the break point
   sort(m_line, m_line + m_col);
 
   calVarianceFromBegin(m_varianceFromBegin);
@@ -42,6 +46,8 @@ void Line::generateCutoff()
   double minWeight = m_varianceFromEnd[0] * m_col * m_col;
   int position = 0;
 
+  // find the positition k such that
+  // [Var_k * k^2 + Var_(n-k) * (n-k)^2] is minimized
   for (int i = 1; i < m_col; ++i) {
 
       double Weight1 = m_varianceFromBegin[i-1] * i * i;
@@ -55,8 +61,13 @@ void Line::generateCutoff()
         }
     }
 
+  // the cutoff value just lies between m_line[k-1] and m_line[k]
   m_cutoff = ( m_line[position - 1] + m_line[position] ) / 2;
 }
+//====================================================================
+// calVarianceFromBegin: calcute the variance for first k elements.
+// An array is used to store all possible results for 0 <= k < n.
+// Calculate only once and repeatedly used.
 
 void Line::calVarianceFromBegin(double* variance)
 {
@@ -79,6 +90,10 @@ void Line::calVarianceFromBegin(double* variance)
       variance[i] /= (i+1);
     }
 }
+//====================================================================
+// calVarianceFromEnd: calcute the variance for last k elements.
+// An array is used to store all possible results for 0 <= k < n.
+// Calculate only once and repeatedly used.
 
 void Line::calVarianceFromEnd(double* variance)
 {
@@ -131,8 +146,11 @@ bool Matrix::generate01Matrix(ifstream &ifs)
       stringstream ss;
       getLine(ifs, ss);
 
-      double row[m_col];
-      copy(istream_iterator<double>(ss), istream_iterator<double>(), row);
+      vector<double> row(m_col);
+      istream_iterator<double> ii(ss);    // make input iterator for stream
+      istream_iterator<double> eos;   // input sentinel, end of stream
+      copy(ii, eos, row.begin());
+
       double cutoffValue = Line(row, m_col).cutoffValue();
 
       int* new_row = new int[m_col];

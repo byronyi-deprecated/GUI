@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
   delete ui;
-  for (map<string, Matrix*>::iterator iter = matrices.begin(); iter != matrices.end(); ++iter)
+  for (map<QString, Matrix*>::iterator iter = matrices.begin(); iter != matrices.end(); ++iter)
     delete iter->second;
 }
 
