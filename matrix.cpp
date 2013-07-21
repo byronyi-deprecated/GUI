@@ -139,7 +139,13 @@ bool Matrix::load(ifstream& ifs, bool raw)
       return getMatrixInfo(ifs);
     }
 }
+//findModules: find influential modules according to samplingSize given.
+map<set<int>, double> findModules(int samplingSize, bool filter = false)
+{
 
+
+}
+//generate01Matrix: import m_matrix from raw file WITH pre-processing
 bool Matrix::generate01Matrix(ifstream &ifs)
 {
   while (ifs.good()) {
@@ -165,7 +171,7 @@ bool Matrix::generate01Matrix(ifstream &ifs)
 
   return true;
 }
-
+//getMatrixInfo: import m_matrix from file WITHOUT pre-processing
 bool Matrix::getMatrixInfo(ifstream &ifs)
 {
   while (ifs.good()) {
@@ -181,7 +187,7 @@ bool Matrix::getMatrixInfo(ifstream &ifs)
   m_row = m_matrix.size();
   return true;
 }
-
+//getFirstLine: get m_classType initialized
 bool Matrix::getFirstLine(ifstream& ifs)
 {
   stringstream ss;
@@ -205,11 +211,138 @@ bool Matrix::getFirstLine(ifstream& ifs)
 
   return true;
 }
-
+//outputClassType: an example and a test for correctly data loading
 string Matrix::outputClassType() const
 {
   stringstream ss;
 
   copy(m_classType.begin(), m_classType.end(), ostream_iterator<int>(ss, " "));
   return ss.str();
+}
+
+//=============================================================================
+// pow: power of num to exp
+double Matrix::pow(double num, int exp)
+{
+  if (exp < 1) return 1;
+  return pow(num, exp - 1) * num;
+}
+//=============================================================================
+// I_stat: calculate the influential statistic according to
+// partions of binary X_k where k belongs to given set s.
+// Return I stat.
+double Matrix::I_stat(const set<int>& s)
+{
+  // use binary number to differentiate different partition elements
+  // e.g. No.0 element has a index 000, No. 7 element has a index 111 (binary)
+  int numPartitions = pow(2, s.size());
+  vector<list<int> > partitions( numPartitions, list<int>() );
+
+  for (int i = 0; i != m_row; ++i) {
+
+      size_t partition_idx = 0;
+
+      for (set<int>::iterator iter = s.begin();
+           iter != s.end(); ++iter) {
+          partition_idx *= 2; // add a bit at the end
+          partition_idx += m_matrix[i][*iter];
+        }
+
+      // add the observation into the partition where it belongs to
+      partitions[partition_idx].push_back(i);
+    }
+
+  double i_stat = 0;
+
+  // for each partition, add it to i_stat
+  for (vector<list<int> >::iterator iter1 = partitions.begin();
+       iter1 != partitions.end(); ++iter1) {
+
+      // (*iter1) is a partition
+      double expect_Y1 = m_p1 * (*iter1).size();
+
+      int Y1 = 0;
+      for (list<int>::iterator iter2 = (*iter1).begin(); iter2 != (*iter1).end(); ++iter2) {
+          Y1 += m_classType[*iter2];
+        }
+
+      i_stat = i_stat + (expect_Y1 - Y1) * (expect_Y1 - Y1);
+    }
+
+  return i_stat;
+}
+//=============================================================================
+// dropOneVariable: drop one X_i such that after dropping, the I_stat is the max
+// of all possible droppings.
+// Return a pair of (I_stat, corresponding set after dropping).
+pair<set<int>, double> Matrix::dropOneVariable(const set<int>& orgin)
+{
+  map<set<int>, double> candidateList;
+
+  // find all possible droppings
+  for (set<int>::iterator iter = orgin.begin();
+       iter != orgin.end(); ++iter) {
+
+      set<int> candidate = orgin;
+      candidate.erase(*iter);
+      candidateList.insert(pair<set<int>, double>(candidate, I_stat(candidate)));
+
+    }
+
+  // find the max I_stat and corresponding dropping
+  map<set<int>, double>::iterator max = candidateList.begin();
+  for (map<set<int>, double>::iterator iter = candidateList.begin();
+       iter != candidateList.end(); ++iter) {
+      if (iter->second > max->second)
+        max = iter;
+    }
+
+  return *max;
+}
+//=============================================================================
+// findMaxSubset: find the subset with the max influential statistic
+// along the whole dropping process (e.g. drop until one variable is left).
+pair<set<int>, double> Matrix::findMaxSubset(const set<int>& origin)
+{
+  map<set<int>, double> candidateList;
+  candidateList.insert(pair<set<int>, double> (origin, I_stat(origin)));
+
+  // find all subset until the candidate size is minimized (e.g. 1)
+  set<int> candidate = origin;
+  while (candidate.size() > 1) {
+
+      pair<set<int>, double> nextStep = dropOneVariable(candidate);
+      candidateList.insert(nextStep);
+      candidate = nextStep.first;
+
+    }
+
+  // find the max I_stat during all droppings
+  map<set<int>, double>::iterator max = candidateList.begin();
+  for (map<set<int>, double>::iterator iter = candidateList.begin();
+       iter != candidateList.end(); ++iter) {
+      if (iter->second > max->second)
+        max = iter;
+    }
+
+  return *max;
+}
+//=============================================================================
+// doFilter: if both module a and module b are detected, check if a is subset
+// of b while I_stat(a) is less than I_stat(b). If so, kick out a from m_modules.
+bool Matrix::isSubset(const set<int>& subset, const set<int>& set)
+{
+  for (set<int>::iterator iter = subset.begin(); iter != subset.end(); ++iter) {
+      if (set.find(*iter) == set::end)
+        return false;
+    }
+  return true;
+}
+
+//=============================================================================
+// doFilter: if both module a and module b are detected, check if a is subset
+// of b. If so, kick a out a from m_modules.
+void Matrix::doFilter()
+{
+
 }

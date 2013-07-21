@@ -3,6 +3,9 @@
 
 #include "fileutils.h"
 #include <vector>
+#include <set>
+#include <list>
+#include <map>
 using namespace std;
 
 // Line: an assistant class for data pre-processing. Everything is
@@ -27,6 +30,7 @@ private:
   double* m_varianceFromEnd;
 };
 
+// Matrix: the actual data structure that store binary X, Y
 class Matrix
 {
 public:
@@ -40,13 +44,32 @@ public:
   int row() const {return m_row;}
   double p0() const {return m_p0;}
   double p1() const {return m_p1;}
+
+  map<set<int>, double> findModules(int samplingSize, bool filter = false); // TO BE DONE!!!!
+
 private:
+  // Load Matrix Methods
   bool generate01Matrix(ifstream& ifs);
   bool getMatrixInfo(ifstream& ifs);
   bool getFirstLine(ifstream& ifs);
 
+  // Find Most Influential Subset Methods, given a orgin set of variables
+  double pow(double num, int exp);
+  double I_stat(const set<int>& s);
+  pair<set<int>, double> dropOneVariable(const set<int>& orgin);
+  pair<set<int>, double> findMaxSubset(const set<int>& origin);
+
+  // Filter mothods
+  bool isSubset(const set<int>& subset, const set<int>& set);
+  void doFilter(); // TO BE DONE!!!!
+
+  // last modules with corresponding I_stat
+  map<set<int>, double> m_modules;
+
+  // m_classType is Y and m_matrix is X
   vector<int> m_classType;
   vector<int*> m_matrix;
+
   int m_col;
   int m_row;
   double m_p0;
