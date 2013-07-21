@@ -85,6 +85,12 @@ bool MainWindow::loadFile(QString fileName)
 
 void MainWindow::on_executeButton_clicked()
 {
+  int trialTimes = ui->trialTimesSpinBox->value();
+  int startingSize = ui->startingSizeCombo->currentText().toInt();
+
+  currentMatrix->findModules(trialTimes, startingSize);
+
+  ui->console->append("Find all modules!");
 }
 
 void MainWindow::on_actionAboutQt_triggered()

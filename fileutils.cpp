@@ -8,6 +8,7 @@ bool openFile(ifstream& ifs, string fileName)
   else
     return true;
 }
+
 bool openFile(ofstream& ofs, string fileName)
 {
   ofs.open(fileName.c_str());
@@ -19,15 +20,22 @@ bool openFile(ofstream& ofs, string fileName)
 
 bool getLine(ifstream& ifs, stringstream& ss)
 {
+  if (!ifs.good())
+    return false;
+
   ss.str(string());
   ss.clear();
   string s;
-  if (!ifs.good())
-    return false;
+
   getline(ifs, s);
+
+  if (stripped(s).empty())
+    return false;
+
   ss.str(stripped(s));
   return true;
 }
+
 string stripped(const string& s)
 {
   string::size_type firstPos = s.find_first_not_of(" \t\r\n");

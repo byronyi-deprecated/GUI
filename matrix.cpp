@@ -3,6 +3,9 @@
 #include <iostream>
 #include <sstream>
 #include <iterator>
+#include <list>
+#include <cstdlib>
+#include <assert.h>
 
 Line::Line(const vector<double>& line, int col)
   : m_line(NULL), m_col(col), m_cutoff(0.0),
@@ -140,17 +143,34 @@ bool Matrix::load(ifstream& ifs, bool raw)
     }
 }
 //findModules: find influential modules according to samplingSize given.
-map<set<int>, double> findModules(int samplingSize, bool filter = false)
+void Matrix::findModules(int trialTimes, int startingSize, bool filter)
 {
+  srand (time(NULL));
 
+  for (int i = 0; i < trialTimes; i++) {
 
+      // initialize original set randomly
+      set<int> origin;
+      for (int j = 0; j < startingSize; j++) {
+          int element = rand() % m_row;
+          origin.insert(element);
+        }
+
+      int numDuplicate(0);
+      if((m_modules.insert(findMaxSubset(origin)).second) == false)
+        numDuplicate++;
+    }
+
+  if (filter)
+    doFilter();
+
+  return;
 }
 //generate01Matrix: import m_matrix from raw file WITH pre-processing
 bool Matrix::generate01Matrix(ifstream &ifs)
 {
-  while (ifs.good()) {
-      stringstream ss;
-      getLine(ifs, ss);
+  stringstream ss;
+  while (getLine(ifs, ss)) {
 
       vector<double> row(m_col);
       istream_iterator<double> ii(ss);    // make input iterator for stream
@@ -238,14 +258,14 @@ double Matrix::I_stat(const set<int>& s)
   int numPartitions = pow(2, s.size());
   vector<list<int> > partitions( numPartitions, list<int>() );
 
-  for (int i = 0; i != m_row; ++i) {
+  for (int i = 0; i != m_col; ++i) {
 
       size_t partition_idx = 0;
 
       for (set<int>::iterator iter = s.begin();
            iter != s.end(); ++iter) {
           partition_idx *= 2; // add a bit at the end
-          partition_idx += m_matrix[i][*iter];
+          partition_idx += m_matrix[*iter][i];
         }
 
       // add the observation into the partition where it belongs to
@@ -330,10 +350,10 @@ pair<set<int>, double> Matrix::findMaxSubset(const set<int>& origin)
 //=============================================================================
 // doFilter: if both module a and module b are detected, check if a is subset
 // of b while I_stat(a) is less than I_stat(b). If so, kick out a from m_modules.
-bool Matrix::isSubset(const set<int>& subset, const set<int>& set)
+bool Matrix::isSubset(const set<int>& subset, const set<int>& superset)
 {
   for (set<int>::iterator iter = subset.begin(); iter != subset.end(); ++iter) {
-      if (set.find(*iter) == set::end)
+      if (superset.find(*iter) == superset.end())
         return false;
     }
   return true;
@@ -344,5 +364,18 @@ bool Matrix::isSubset(const set<int>& subset, const set<int>& set)
 // of b. If so, kick a out a from m_modules.
 void Matrix::doFilter()
 {
+  for (map<set<int>, double>::iterator iter = m_modules.begin();
+       iter != m_modules.end(); ++iter) {
 
+      map<set<int>, double>::iterator subset = m_modules.begin();
+      while (subset != m_modules.end()) {
+
+          if (isSubset(subset->first, iter->first)) {
+              m_modules.erase(subset++); // if ++subset, subset will be invalidated
+            }
+          else {
+              subset++;
+            }
+        }
+    }
 }

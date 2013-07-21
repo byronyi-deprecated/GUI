@@ -4,7 +4,6 @@
 #include "fileutils.h"
 #include <vector>
 #include <set>
-#include <list>
 #include <map>
 using namespace std;
 
@@ -45,7 +44,9 @@ public:
   double p0() const {return m_p0;}
   double p1() const {return m_p1;}
 
-  map<set<int>, double> findModules(int samplingSize, bool filter = false); // TO BE DONE!!!!
+  const map<set<int>, double>& modules() const {return m_modules;}
+
+  void findModules(int trialTimes, int startingSize, bool filter = false); // TO BE DONE!!!!
 
 private:
   // Load Matrix Methods
@@ -60,10 +61,10 @@ private:
   pair<set<int>, double> findMaxSubset(const set<int>& origin);
 
   // Filter mothods
-  bool isSubset(const set<int>& subset, const set<int>& set);
+  bool isSubset(const set<int>& subset, const set<int>& superset);
   void doFilter(); // TO BE DONE!!!!
 
-  // last modules with corresponding I_stat
+  // Modules detected with corresponding I_stat
   map<set<int>, double> m_modules;
 
   // m_classType is Y and m_matrix is X

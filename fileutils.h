@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <iostream>
 using namespace std;
 
 bool openFile(ifstream& ifs, string fileName);
