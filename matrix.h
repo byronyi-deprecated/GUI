@@ -46,7 +46,7 @@ public:
 
   const map<set<int>, double>& modules() const {return m_modules;}
 
-  void findModules(int trialTimes, int startingSize, bool filter = false); // TO BE DONE!!!!
+  double findModules(int trialTimes, int startingSize, bool filter = false);
 
 private:
   // Load Matrix Methods
@@ -62,7 +62,7 @@ private:
 
   // Filter mothods
   bool isSubset(const set<int>& subset, const set<int>& superset);
-  void doFilter(); // TO BE DONE!!!!
+  int doFilter();
 
   // Modules detected with corresponding I_stat
   map<set<int>, double> m_modules;

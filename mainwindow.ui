@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>799</width>
-    <height>447</height>
+    <width>805</width>
+    <height>478</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -176,7 +176,7 @@
               <number>4000000</number>
              </property>
              <property name="singleStep">
-              <number>100000</number>
+              <number>10000</number>
              </property>
             </widget>
            </item>
@@ -235,6 +235,13 @@
            </item>
           </layout>
          </item>
+         <item>
+          <widget class="QProgressBar" name="progressBar">
+           <property name="value">
+            <number>24</number>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -279,7 +286,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>799</width>
+     <width>805</width>
      <height>25</height>
     </rect>
    </property>

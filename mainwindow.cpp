@@ -1,10 +1,11 @@
 #include <fstream>
 #include <string>
+#include <QString>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "fileutils.h"
 
-#include <QDebug>
+#include <cstdlib>
 
 using namespace std;
 
@@ -15,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
   ui->setupUi(this);
   ui->inputGroupBox->setDisabled(true);
+  ui->progressBar->hide();
 }
 
 MainWindow::~MainWindow()
@@ -87,10 +89,22 @@ void MainWindow::on_executeButton_clicked()
 {
   int trialTimes = ui->trialTimesSpinBox->value();
   int startingSize = ui->startingSizeCombo->currentText().toInt();
+  bool filter = ui->filterCheck->isChecked();
 
-  currentMatrix->findModules(trialTimes, startingSize);
+  ui->progressBar->setRange(0, trialTimes - 1);
+  ui->progressBar->show();
 
-  ui->console->append("Find all modules!");
+  int t = time(NULL);
+  currentMatrix->findModules(trialTimes, startingSize, filter);
+
+  t = time(NULL) - t;
+  QString time;
+  time.setNum(t);
+
+  ui->console->append("Find all modules!\nElapsed time: ");
+  ui->console->append(time + " seconds");
+
+  ui->progressBar->hide();
 }
 
 void MainWindow::on_actionAboutQt_triggered()
@@ -100,7 +114,7 @@ void MainWindow::on_actionAboutQt_triggered()
 
 void MainWindow::on_trialTimesSlider_valueChanged(int value)
 {
-  int round_off = value / 100000;
-  round_off *= 100000;
+  int round_off = value / 10000;
+  round_off *= 10000;
   ui->trialTimesSlider->setValue(round_off);
 }

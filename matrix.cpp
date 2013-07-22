@@ -143,9 +143,12 @@ bool Matrix::load(ifstream& ifs, bool raw)
     }
 }
 //findModules: find influential modules according to samplingSize given.
-void Matrix::findModules(int trialTimes, int startingSize, bool filter)
+double Matrix::findModules(int trialTimes, int startingSize, bool filter)
 {
   srand (time(NULL));
+
+  int numDuplicate(0);
+//  int step = trialTimes / 100; // for counting progress
 
   for (int i = 0; i < trialTimes; i++) {
 
@@ -156,15 +159,19 @@ void Matrix::findModules(int trialTimes, int startingSize, bool filter)
           origin.insert(element);
         }
 
-      int numDuplicate(0);
       if((m_modules.insert(findMaxSubset(origin)).second) == false)
         numDuplicate++;
+
+//      if (((10*i) % step) == 0)
+//        cout << ((double)i / step)  << endl;
     }
 
+//  int t = time(NULL);
   if (filter)
-    doFilter();
+    numDuplicate += doFilter();
+//  cout << time(NULL) - t << endl;
 
-  return;
+  return (numDuplicate / (double) trialTimes);
 }
 //generate01Matrix: import m_matrix from raw file WITH pre-processing
 bool Matrix::generate01Matrix(ifstream &ifs)
@@ -362,8 +369,10 @@ bool Matrix::isSubset(const set<int>& subset, const set<int>& superset)
 //=============================================================================
 // doFilter: if both module a and module b are detected, check if a is subset
 // of b. If so, kick a out a from m_modules.
-void Matrix::doFilter()
+int Matrix::doFilter()
 {
+  int numDuplicates(0);
+
   for (map<set<int>, double>::iterator iter = m_modules.begin();
        iter != m_modules.end(); ++iter) {
 
@@ -372,10 +381,12 @@ void Matrix::doFilter()
 
           if (isSubset(subset->first, iter->first)) {
               m_modules.erase(subset++); // if ++subset, subset will be invalidated
+              numDuplicates++;
             }
           else {
               subset++;
             }
         }
     }
+  return numDuplicates;
 }
